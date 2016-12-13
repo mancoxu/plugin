@@ -1,0 +1,104 @@
+<!DOCTYPE HTML>
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Language" content="zh-cn" />
+<title>自定义滚动条</title>
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<style type="text/css">
+body,div,p{margin: 0px; padding: 0px;}
+.wrap{width: 315px; height: 402px;  position: relative; margin: 100px;overflow: hidden;}
+p{font:14px/2.0 "微软雅黑"; color: #566; text-shadow:0px 0px 1px #999;}
+#parent{width: 12px; height: 402px; background: #ace;
+	position: absolute; top: 0px;right: 0px;}
+#dateil{width: 10px; height: 30px; background: #eca; position: absolute; cursor:pointer; 
+	top: 0px; left: 1px;}	
+#main{width: 300px;height: 400px;border:1px solid #ccc; position: absolute; top: 0px;left: 0px;}
+.cont{width: 280px;padding: 10px; position: absolute; top: 0px; left: 0px;}
+</style>
+</head>
+<body style="height:2000px;">
+<div class="wrap">
+	<div id="parent">
+		<div id="dateil"></div>
+	</div>
+	<div id="main">
+		<div class="cont">
+			<p>玄黄珠是一方世界，可以孕育玄黄之气，修炼者在其中修炼不但会洗涤灵智和灵根，甚至会自动修正修炼者功法的偏差。不但如此，修炼速度还是别人的数倍甚至数十上百倍。而且，长期在玄黄之气中修炼，可以同阶无敌……</p>
+	<p>前主人东方旺，东方旺自爆后使其遁走，某些原因机缘巧合砸中宁城，使宁城穿越到奕星大陆！
+	开天辟地之物，话说混沌初开，生灵万物俱无，天地连成一片，只在其间孕育着一株混沌青莲，那青莲有叶五片，开花二十四瓣，结成一颗莲子。待得亿万年期满，莲子裂开，盘古大神手执开天斧出世，盘古大神因不满混沌中那无穷无尽的压抑，遂用那开天斧将天地劈开。</p>
+	<p>与其同等层次的法宝还有另外四种：造化玄黄珠、造化玉蝶、造化金页、造化不灭斧。</p>
+	<p>开天辟地之物，记载了大道三千，与开天神斧、混沌青莲并为混沌至宝，因开天而破损，后大部分为鸿钧老祖所得，助其成就混元大罗金仙果位，是为：高卧九重天，蒲团了道真，天地玄黄外，吾当掌教尊，盘古生太极，两仪四象循，一道传三友，两教阐截分，玄门都领袖，一气化鸿钧。</p>
+	<p>与其同等层次的法宝还有另外四种：造化玄黄珠、造化青莲、造化金页、造化不灭斧。</p>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+window.onload = function(){
+	var oParent = document.getElementById("parent");
+	var dateil = document.getElementById("dateil"); 
+	var oMain = document.getElementById("main");
+	var oCont = oMain.getElementsByTagName("div")[0];
+	var max = oCont.offsetHeight - oMain.offsetHeight;
+	dateil.onmousedown = function(ev){
+        var ev = ev||event;
+        var scrollTop = document.documentElement.scrollTop||document.body.scrollTop;
+		var disY = ev.clientY + scrollTop  - this.offsetTop; 
+		console.log(disY)
+		if(dateil.setCapture){
+			dateil.setCapture();
+		}
+		document.onmousemove = function(ev){
+			var ev = ev||event;
+			var T = ev.clientY + scrollTop - disY;
+			// console.log(T)
+			setTop(T);
+		}
+		document.onmouseup = function(){
+			document.onmousemove = document.onmouseup = null;
+			if(dateil.setCapture){
+				detail.releaseCapture();
+			}
+		}
+		return false;
+	} 
+	function addEvent(o,s,fun){o.attachEvent?o.attachEvent("on"+s,fun):o.addEventListener(s,fun,false);}
+	addEvent(oParent,"mousewheel",getDetail);
+	addEvent(oParent,"DOMMouseScroll",getDetail);
+	addEvent(oMain,"mousewheel",getDetail);
+	addEvent(oMain,"DOMMouseScroll",getDetail);
+	//addEvent();
+    function getDetail(ev){ 
+    	var ev = ev||event;
+		var b = true;
+        if(ev.detail){
+           b = ev.detail > 0 ? false : true;
+        }else{
+           b = ev.wheelDelta > 0 ? true:false;	
+        }
+		if(b){
+			setTop(dateil.offsetTop - 10);
+		}else{
+			setTop(dateil.offsetTop + 10);
+		}
+		if(ev.preventDefault){
+			ev.preventDefault();
+		}
+		return false;
+    }
+	function setTop(t){
+		if(t <= 0){
+			t = 0;
+		}else if( t >= oParent.offsetHeight - dateil.offsetHeight){
+			t = oParent.offsetHeight - dateil.offsetHeight;
+		}
+        dateil.style.top = t + "px";
+        var scale = t/(oParent.offsetHeight - dateil.offsetHeight);
+        oCont.style.top = -scale *  max + "px";
+	}
+}	
+</script>
+</body>
+</html>
+

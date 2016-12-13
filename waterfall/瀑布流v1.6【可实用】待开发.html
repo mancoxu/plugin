@@ -1,0 +1,690 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>The waterfall flow</title>
+	<style type="text/css">
+		*{margin: 0;padding: 0;list-style: none;}
+		a{text-decoration: none;color: #333;line-height: 24px;font-family: 'Microsoft YaHei';}
+		img{width: 100%;vertical-align: top;border: 0;}
+		body{background-color: #f3f3f3; }
+		#WaterfallFlow{
+			 margin: 0 auto;height: auto;  position: relative; padding-bottom: 85px;
+		}
+		#WaterfallFlow ul{ position: relative;margin: 0 auto; min-height: 100px;  }
+		#WaterfallFlow li{
+			 position: absolute;top:2000px;left: 0;  min-height: 30px;height: auto;overflow: hidden; box-shadow: 0 0 3px 2px #ccc;
+			 /*-webkit-transition:all .7s ease-out .1s;-moz-transition:all .7s ease-out;-o-transition:all .7s ease-out .1s;transition:all .7s ease-out .1s  width: 290px;*/
+		}
+		#WaterfallFlow li img{display: block;width: 100%; }
+		#flowLoading{display: none;width: 100%;position: absolute;bottom:30px;left: 0;height: 43px;border: 1px solid #ddd;background-color: #eee;line-height: 43px;font-size: 18px; font-family: 'Microsoft YaHei';box-shadow: 0 0 5px 0 #ddd;}
+		#flowLoading > div{width: 140px;height: 100%;margin: 0 auto;color: #666;background:url(http://p5.yokacdn.com/pic/flowsloading.gif) no-repeat 120px 13px; }
+		#flowLoading.on{display: block;} 
+	</style>
+	<!--<script type="text/javascript" src="http://fan.yoka.com/fan5.0/js/jquery1.9.js"></script>-->
+	<script type="text/javascript" src="http://p5.yokacdn.com/pic/div/2015/products/bbs/ajax_dommin.js"></script>	
+</head> 
+<body>
+<div style="height:100px;   margin:0 auto; margin-bottom:10px;"></div>  
+<div id="WaterfallFlow">
+	
+</div> 
+<script type="text/javascript"> 
+ 
+// 更新：
+// 05.27: 回调函数this指向img本身
+// 04-02: 1、增加图片完全加载后的回调 2、提高性能
+
+/**
+ * 图片头数据加载就绪事件 - 更快获取图片尺寸
+ * @version	2011.05.27
+ * @see		http://blog.phpdr.net/js-get-image-size.html
+ * @param	{String}	图片路径
+ * @param	{Function}	尺寸就绪
+ * @param	{Function}	加载完毕 (可选)
+ * @param	{Function}	加载错误 (可选)
+ * @example imgReady('http://www.google.com.hk/intl/zh-CN/images/logo_cn.png', function () {
+		alert('size ready: width=' + this.width + '; height=' + this.height);
+	});
+ */
+var imgReady = (function () {
+	var list = [], intervalId = null,
+
+	// 用来执行队列
+	tick = function () {
+		var i = 0;
+		for (; i < list.length; i++) {
+			list[i].end ? list.splice(i--, 1) : list[i]();
+		};
+		!list.length && stop();
+	},
+
+	// 停止所有定时器队列
+	stop = function () {
+		clearInterval(intervalId);
+		intervalId = null;
+	};
+
+	return function (url, ready, load, error) {
+		var onready, width, height, newWidth, newHeight,
+			img = new Image(); 
+
+		img.src = url;
+
+		// mancoxu add  begin
+		// 如果数据里图片地址不是http://开头, IE8--会一直加载, 导致后面数据加载不出来
+		var sliceHTTP = img.src.slice(0,7);  
+		if (sliceHTTP !== "http://") { 
+			img.src = "http://luck.jpg";
+		};
+		// mancoxu add  end
+
+		// 如果图片被缓存，则直接返回缓存数据
+		if (img.complete) {
+			ready.call(img);
+			load && load.call(img);
+			return;
+		};
+
+		width = img.width;
+		height = img.height;
+
+		// 加载错误后的事件
+		img.onerror = function () {
+			error && error.call(img);
+			onready.end = true;
+			img = img.onload = img.onerror = null;
+		};
+
+		// 图片尺寸就绪
+		onready = function () {
+			newWidth = img.width;
+			newHeight = img.height;
+			if (newWidth !== width || newHeight !== height ||
+				// 如果图片已经在其他地方加载可使用面积检测
+				newWidth * newHeight > 1024
+			) {
+				ready.call(img);
+				onready.end = true;
+			};
+		};
+		onready();
+
+		// 完全加载完毕的事件
+		img.onload = function () {
+			// onload在定时器时间差范围内可能比onready快
+			// 这里进行检查并保证onready优先执行
+			!onready.end && onready();
+
+			load && load.call(img);
+
+			// IE gif动画会循环执行onload，置空onload即可
+			img = img.onload = img.onerror = null;
+		};
+
+		// 加入队列中定期执行
+		if (!onready.end) {
+			list.push(onready);
+			// 无论何时只允许出现一个定时器，减少浏览器性能损耗
+			if (intervalId === null) intervalId = setInterval(tick, 40);
+		};
+	};
+})();
+ 
+;(function(){
+
+  /**  
+	*  作者		:   老可 [mancoxu]
+	*  日期		：  2015-06-16
+	*  版本		:   v1.6
+	*  Q Q  	:   279662403		
+	*  兼容		:   IE6+ 
+	*  提高性能 :   1.加载：由图片load后加载改为获得图片尺寸立即加载(v1.5)
+	*				2.滚动: 滚动时由重新调用整个插件改为只调用定位方法(v1.5)
+	*  本版本 	: 新增接口,实现在调用函数时添加dom  
+	*/ 
+
+	function FlowFn(){
+		
+		this.init.apply(this,arguments); 
+	}
+	FlowFn.prototype = {
+		init: function(options){ 
+
+			var _is = this;  
+			_is.settings = {
+				wrap  	 : null,					// *必填   盒子ID  
+				lisw  	 : 290,						//  选填   li的宽  默认290
+				mw    	 : 10, 						//  选填   LI左右边距
+				mh    	 : 10, 						//  选填   LI 下边距
+				response : "auto",					//  选填   auto 为响应式 , 或number   eg:1190 
+				url      : "",						//  必填   请求地址  注意: page必须要在最后
+				//dataBegin: , 	
+				//imgIdx:img[0],
+				addDom:function (liBox,html,imgHeight,dataIndex){
+
+				   /**
+					*   {obj} liBox  	--瀑布流LI盒子		
+					*	{str} html      --添加的内容dom
+					*	{str} imgHeight --图片高
+					*	{arr} dataIndex --数据索引值 
+					*
+					*/
+				} 
+			};
+			_is.obj    = _is.extendDeep(options,_is.settings);
+
+			_is.oWrap  = document.getElementById(_is.obj.wrap); 
+			_is.Ajax   = Request(); 
+			_is.nMw    = _is.obj.mw;
+			_is.nMh    = _is.obj.mh;
+			_is.nLisClientW  = _is.obj.lisw; 
+			_is.nLisOffsetW  = _is.obj.lisw + _is.nMw; 
+			
+			_is.nWrapW = 0;
+			_is.n 	   = 0;
+			_is.Col    = 0;
+			_is.result = null;
+			_is.page   = 0;
+			_is.dataLen = 0; 
+			_is.oFrag  = document.createDocumentFragment();  
+
+			// 栈堆
+			_is.order   = 2;
+			_is.stackStrEle;
+			_is.stackArrUnit = [];
+			_is.stackArrEle  = [];
+
+				  
+			_is.oUl    = document.createElement('ul');
+			_is.oWrap.appendChild(_is.oUl); 
+				 
+
+			_is.setWrapFn();
+			_is.loadingBoxFn(); 
+			_is.setStyle().pubInitFn(); 
+			
+
+		},
+		setWrapFn: function(){
+			var _is = this;
+			if (typeof _is.obj.response == "string" && _is.obj.response == "auto"){   
+
+
+				_is.nWrapW = document.documentElement.clientWidth || document.body.clientWidth; 
+				_is.n 	= Math.floor(_is.nWrapW / _is.nLisOffsetW); 
+				_is.Col = _is.n == 0 ? 1 : _is.n; 
+				_is.oWrap.style.width = _is.nLisOffsetW * _is.Col - _is.nMw + "px";    
+
+			}else if(typeof _is.obj.response == "number"){ 
+				
+				_is.nWrapW = _is.oWrap.style.width = _is.obj.response + "px";  
+				_is.sliceWrap = _is.nWrapW.slice(0,-2)
+				_is.n 	= Math.floor(_is.sliceWrap / _is.nLisClientW );  
+				_is.Col = _is.n == 0 ? 1 : _is.n;
+
+			}else{
+				throw new Error("response 参数类型错误（'auto' 或 number类型）")
+			}
+		},
+		loadingBoxFn: function(){
+			var _is = this,	oInText;  
+
+			_is.loadingBox = document.createElement('div');
+			_is.loadingCn  = document.createElement('div');			
+			_is.loadingBox.id = "flowLoading";  
+ 			_is.loadingBox.appendChild(_is.loadingCn);
+ 			_is.oWrap.appendChild(_is.loadingBox); 
+			oInText = _is.loadingCn.innerHTML = "正在拼命加载"; 
+
+		},
+
+		// 数据请求
+		posData: function (callbacks){
+			var _is = this;  
+
+			_is.loadingBox.className = "on";
+			_is.page++; 
+			console.log("_is.page= " + _is.page) 
+			_is.Ajax.jsonp({
+				//url:"http://bbs.yoka.com/test/test.php?&page=" + _is.page,
+				url:_is.obj.url + _is.page, 
+				type:"get",
+				dataType:"jsonp",
+				success:function(data){   
+					callbacks(data.docs)   //   ****************    json 开始
+				}
+			})    
+		},
+
+		// 添加数据
+		addItem: function (data,callbacks){  
+			//console.log(data)
+			var _is = this,
+				realData = data, 
+			    oImgUrl,
+			    oImgH = 0, 
+				num = 0,
+				i = 0,
+				html = '', 
+			    aImgH = [],
+		   		newTime = new Timer();  
+
+		   		_is.dataLen = realData.length;  // 数据长度
+	   		 
+			(function loadImgFn(){ 
+				
+				if (num < _is.dataLen) {  
+
+					//console.log("mun = "+num +" _is.dataLen ="+_is.dataLen )
+					oImgUrl = realData[num].imgs[0];   //   ******** json 里图片属性索引
+
+					imgReady(oImgUrl, 
+						function(){ //	尺寸就绪
+							var w = this.width,h = this.height;
+							
+							oImgH = Math.round(_is.obj.lisw * (h / w));  
+							aImgH.push(oImgH); 
+							num++;
+							loadImgFn();
+
+						},
+						function(){ //  加载完毕
+						},
+						function(){ //	加载错误  
+							console.log("注意 "+ this.src + " 加载失败");
+							//this.src = 'http://fan.yoka.com/fan5.0/img/loading.gif';    
+							num++;
+							loadImgFn();    
+						}
+					) 
+					
+				}else{ 
+					for (; i < _is.dataLen; i++) { 
+					 	var oli = document.createElement('li');
+					 	oli.style.width = _is.obj.lisw + "px";  
+
+					 	_is.obj.addDom.call(null, oli, html, aImgH[i], realData[i], function (){});
+					 	   
+						_is.oFrag.appendChild(oli); 
+						 
+					}; 
+					 
+					_is.oUl.appendChild(_is.oFrag);
+					_is.loadingBox.className = "";  
+					callbacks();
+				} 
+				//console.log('耗时 ' + (newTime.stop() / 1000) +' 秒')
+			})()
+			
+			
+			
+			
+		}, 
+
+		// 设置样式
+		setStyle: function(){
+			var _is        = this,
+				_oLi       = _is.oWrap.getElementsByTagName('li'), 
+				_arrLen    = [], 
+				_arrH      = [],
+				_max_H 	   = 0, 
+				_len       = 0,
+				_newLiLen  = 0,
+				_minIdex   = null,
+				_minIdexL  = null,
+				_oLiIndex  = null,
+				_oLiIndexL = null; 
+				   
+			// 初始化
+			function initFn(){   
+
+				_is.posData(function(data){  
+					_is.addItem(data,function(){   
+						_len = _is.dataLen; 
+						viewFn("init");   
+					}) 
+				})  
+					 
+			}
+
+			// 窗口改变
+			function resizeFn(){ 
+
+				_arrLen = [];
+				_arrH   = []; 
+				_len = _oLi.length; 
+				_is.setWrapFn(); 
+				viewFn("resizes");	 
+				console.log('resize')
+			}	 
+			
+			// 滚动添加数据
+			function srollFn(){
+				var st = _is.getMinValue(_arrH),
+					scrollT = document.documentElement.scrollTop || document.body.scrollTop,
+					clientH = document.documentElement.clientHeight || document.body.clientHeight;  
+
+				if (scrollT >= st - clientH) {
+
+					window.onscroll = null;  
+					_is.posData(function(data){ 
+						_is.addItem(data,function(){   
+							
+							// 堆栈优化  
+							/*if (_is.stackArrUnit.length > _is.order) {
+
+								// 删除元素的同时要把数组里的数据给删除 
+								for (var i = 0; i < _is.dataLen; i++) {
+									_arrLen.pop(i) 	 
+								} 
+								_len  = _newLiLen - _is.dataLen		
+							}*/ 
+							_newLiLen = _oLi.length; 
+							
+							viewFn(); 
+
+						}) 
+					}) 	  
+				} 
+
+
+			}   
+
+			function viewFn(Status){ 
+
+				if (Status){ 
+					
+					for (var i = 0; i < _len; i++) { 
+
+	  					_arrLen.push(_oLi[i].offsetHeight)
+	  				};   
+					for (var i = 0; i < _len; i++) { 
+						_oLiIndex =  _oLi[i].style;  
+
+						if (i < _is.Col) {     
+
+							_oLiIndex.top = 0;
+							_oLiIndex.left = i * _is.nLisOffsetW + "px";
+
+							if (Status === "resizes") { 
+									_oLiIndex.transitionDuration = "0.5s"; 
+							}
+						 	_arrH.push(_arrLen[i]); 
+						 	
+						}else{
+
+							_minIdex = _is.getMinKey(_arrH);  //获取最短的一列的索引值   
+
+							_oLiIndex.top = _arrH[_minIdex] + _is.nMh + "px";
+							_oLiIndex.left = _minIdex * _is.nLisOffsetW + "px";  
+
+							if (Status === "resizes") { 
+									_oLiIndex.transitionDuration = "0.5s"; 
+							}
+
+							_arrH[_minIdex] = _arrLen[i] +  _arrH[_minIdex] + _is.nMh //更新高度 
+
+							
+						}  
+
+					}  
+					updataHFn(); 
+
+				}else{						
+					console.log("_len= "+ (_len))
+					console.log("_newLiLen = "+_newLiLen) 
+
+					for (var i = _len ; i < _newLiLen; i++) {  
+					 		//console.log([i])
+							_arrLen.push(_oLi[i].offsetHeight) 
+					} 
+					for (var i = _len; i < _newLiLen; i++) {  
+					 
+						_oLiIndex =  _oLi[i].style; 
+ 						_minIdex = _is.getMinKey(_arrH);  //获取最短的一列的索引值   
+ 						 
+ 						_oLiIndex.top = _arrH[_minIdex] + _is.nMh + "px";
+						_oLiIndex.left = _minIdex * _is.nLisOffsetW + "px";   
+						_arrH[_minIdex] = _arrLen[i] +  _arrH[_minIdex] + _is.nMh //更新高度  
+
+
+					};
+					console.log(_arrH) 
+					 
+					_len = _newLiLen;  
+					window.onscroll = srollFn;
+
+					updataHFn();
+					 
+				}
+ 				
+ 				//  堆栈优化  
+				/*if (Status !== "resizes") {
+					_is.stack().pushStack(_is.oUl.innerHTML)
+				}*/
+			}
+
+
+			function updataHFn(){
+				_max_H = Math.max.apply(null,_arrH); 
+				_is.oUl.style.height = _max_H + _is.nMh + "px";
+			}
+				
+
+			// 调用
+			if (_is.obj.response == "auto") {
+				setTimeout(function(){
+					window.onresize = resizeFn;
+				},200)
+			}
+			
+			window.onscroll =  srollFn;
+			
+
+			// 公共接口
+			return {
+
+				pubInitFn: initFn
+			}
+
+				
+				 
+ 
+		},
+
+		// 利用堆栈增减节点,提高性能
+		stack:function(){  
+			var _is = this,oLi = _is.oUl.getElementsByTagName('li');
+					
+			function addStack(v){   
+
+				_is.stackStrEle = v.split('</li>');
+				_is.stackArrEle = _is.stackStrEle.slice(-(_is.dataLen + 1))//-21;   //截取每次数据的li节点
+
+
+				for (var i = 0; i < _is.stackArrEle.length; i++) {
+
+					_is.stackArrEle[i] = _is.stackArrEle[i] + "</li>"
+				}; 
+				_is.stackArrEle.pop()
+
+				_is.stackArrUnit.push(_is.stackArrEle) 
+				//console.log(_is.stackArrEle)
+				delEle(_is.stackArrUnit)
+				
+			} 
+			function delEle(Ele){ 
+				//console.log(Ele.length)
+				var arrSon = 0, Count = null, fileEle = null;
+					
+				for (var i = 0; i < Ele.length; i++) {
+					arrSon = Ele[i];
+				};
+				Count = arrSon.join('');
+				fileEle = _is.oUl.innerHTML.indexOf(Count);  
+
+				if (Ele.length > _is.order && fileEle > -1) {  
+					for (var i = 0; i < arrSon.length; i++) { 
+ 						// 这里必须吐一下，细节问题蛋疼了一上午： 这里是要删除一组元素节点，不要用oLi[i]来删除,因为每一次删除了第一个后，下一个节点就变成了第一个 ， 造成隔一个删除一个 。所以应该只删除第一个
+						_is.oUl.removeChild(oLi[0]);
+						console.log('delEle')
+					};
+					
+				}  
+				 
+			}
+
+			return{
+
+				pushStack:addStack
+			}
+		},  
+		//获取数字数组最小值的索引 
+		getMinKey: function (arr) {
+			var a = arr[0], b = 0;
+
+			for (var k in arr) { 
+				if (arr[k] < a) {
+
+					a = arr[k];
+					b = k; 
+				}
+			}
+			return b;
+		}, 
+		//获取数字数组的最小值 
+		getMinValue: function (arr) {
+			var a = arr[0]; 
+
+			for (var k in arr) { 
+				if (arr[k] < a) {
+
+					a = arr[k];
+				}
+			}
+			return a;
+		}, 
+		// 复制
+		extendDeep: function(parent,child){
+			var i,
+				toStr = Object.prototype.toString(),
+				astr = "[Object Array]";
+
+			child = child || {}; 
+
+			for(i in parent){ 
+				if (parent.hasOwnProperty(i)) { 
+					if (typeof parent[i] === "Object") { 
+
+						child[i] = (toStr.call(parent[i]) === astr) ? [] : {};
+						extendDeep(parent[i], child[i]);
+
+					} else { 
+						child[i] = parent[i];
+					}
+				}
+
+			} 
+			return child;
+		}
+
+	}
+
+
+	window['flowFn'] = function(options){
+		return new FlowFn(options)
+	}
+
+
+	// 计算加载时间
+	var Timer = function (){
+        this.startTime = (new Date()).getTime();
+    };
+    Timer.prototype.stop = function(){
+        return (new Date()).getTime() - this.startTime;
+    }; 	
+
+
+})()
+
+
+
+
+
+window.onload = function(){ 
+	flowFn({
+		wrap: "WaterfallFlow",
+		//response:1190,
+		url:"http://brand.yoka.com/?_c=search&_a=comments&page=", 
+		addDom:function (liBox,html,imgHeight,dataIndex){ 
+		    /**
+			*   {obj} liBox  	--瀑布流LI盒子		
+			*	{str} html      --添加的内容dom
+			*	{str} imgHeight --图片高
+			*	{arr} dataIndex --数据索引值 
+			*
+			*/ 
+			Html = '<a href="#"><img height="'+ imgHeight +'" src="' + dataIndex.imgs[0] + '"/>'+ dataIndex.Context +'</a>' ; 
+			
+			liBox.innerHTML = Html; 
+			//console.log(Html)
+		}  
+	})
+
+	
+} 
+ 
+
+</script>	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <ul>
+	        <li><a href="#"><img src="http://img.hb.aicdn.com/fbe1b1f5afbef75c2318a0876fbe8f3ed56d0fc5bf31-VbL1zd_fw658"></a>1</li>
+	        <li><a href="#"><img src="img/2.jpg"></a>2</li>
+	        <li><a href="#"><img src="img/3.jpg"></a>3</li>
+	        <li><a href="#"><img src="img/4.jpg"></a>4</li>
+	        <li><a href="#"><img src="img/5.jpg"></a>5</li>
+	        <li><a href="#"><img src="img/6.jpg"></a></li>
+	        <li><a href="#"><img src="img/7.jpg"></a></li>
+	        <li><a href="#"><img src="img/8.jpg"></a></li>
+	        <li><a href="#"><img src="img/1.jpg"></a></li>
+	        <li><a href="#"><img src="img/4.jpg"></a></li>
+	        <li><a href="#"><img src="img/3.jpg"></a></li>
+	        <li><a href="#"><img src="img/5.jpg"></a></li>
+	        <li><a href="#"><img src="img/7.jpg"></a></li>
+	        <li><a href="#"><img src="img/2.jpg"></a></li>
+	        <li><a href="#"><img src="img/5.jpg"></a>5</li>
+	        <li><a href="#"><img src="img/6.jpg"></a></li>
+	        <li><a href="#"><img src="img/7.jpg"></a></li>
+	        <li><a href="#"><img src="img/8.jpg"></a></li>
+	        <li><a href="#"><img src="img/1.jpg"></a></li>
+	        <li><a href="#"><img src="img/4.jpg"></a></li>
+	        <li><a href="#"><img src="img/3.jpg"></a></li>
+	        <li><a href="#"><img src="img/5.jpg"></a></li>
+	        <li><a href="#"><img src="img/7.jpg"></a></li>
+	        <li><a href="#"><img src="img/2.jpg"></a></li>
+    </ul>  --> 
+</body>
+</html>

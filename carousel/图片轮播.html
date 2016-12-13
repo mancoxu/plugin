@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>scrollimg</title>
+</head>
+<body>
+<style type="text/css">
+	*{margin:0;padding: 0;}
+	ul,li,ol{list-style: none;}
+	img{vertical-align: top;width: 100%;}
+	a{text-decoration: none;}
+
+	/*================================== 样式开始 ==================================*/
+	#scrollImgWrap{
+		 height: auto;position: relative;clear: both;margin:50px auto;background-color: #eee;
+	}  
+	/*#scrollImgWrap .slIMain ul{position: absolute;top:0;left:0;width: 500%;height: auto;overflow: hidden;}*/
+	#scrollImgWrap li{
+		width: 320px;height: auto;/*LI的高为必要元素*/overflow: hidden;margin-right: 10px;float: left;
+	}
+	#scrollImgWrap li div.s{width: 320px;height: 250px;overflow: hidden;}
+	#scrollImgWrap li img{width: 100%;}
+	/*切换按钮*/
+	#scrollImgWrap .slIBtnPrev,#scrollImgWrap .slIBtnNext{
+		position: absolute;top:50%;margin-top: -25px;width: 50px;height: 50px;background-color: #000;background:rgba(0,0,0,0.5);cursor: pointer;
+	}
+	#scrollImgWrap .slIBtnPrev{left: -25px;}
+	#scrollImgWrap .slIBtnNext{right:-25px;}
+
+	/*page引导*/
+	#scrollImgWrap .slIPage{
+		display: block;position: absolute;bottom:10px;right:10px;display: inline-block;
+	}
+	#scrollImgWrap .slIPage i{
+		display: block;float: left;margin-right: 10px;width: 12px;height: 12px;background-color: #666;border-radius: 50%;
+	}
+	#scrollImgWrap .slIPage i.on{background-color: green;}
+	
+	/*================================== 样式结束 ==================================*/
+
+
+	/*以下为测试 可DEL*/
+	#scrollImgWrap2{
+		 height: auto;position: relative;clear: both;margin:50px auto;background-color: #eee;
+	}   
+	#scrollImgWrap2 li{
+		width: 320px;height: auto;overflow: hidden;margin-right: 10px;float: left;
+	}
+	#scrollImgWrap2 li div.s{width: 320px;height: 250px;overflow: hidden;}
+	#scrollImgWrap2 li img{width: 100%;} 
+	#scrollImgWrap2 .slIBtnPrev,#scrollImgWrap2 .slIBtnNext{
+		position: absolute;top:50%;margin-top: -25px;width: 50px;height: 50px;background-color: #000;background:rgba(0,0,0,0.5);cursor: pointer; 
+	}
+	#scrollImgWrap2 .slIBtnPrev{left: -25px;}
+	#scrollImgWrap2 .slIBtnNext{right:-25px;}
+ 
+	#scrollImgWrap2 .slIPage{
+		display: block;position: absolute;bottom:10px;right:10px;display: inline-block;
+	}
+	#scrollImgWrap2 .slIPage i{
+		display: block;float: left;margin-right: 10px;width: 12px;height: 12px;background-color: #666;border-radius: 50%;
+	}
+	#scrollImgWrap2 .slIPage i.on{background-color: green;}
+</style>	
+</body>
+
+<!-- dom begin -->
+<div id="scrollImgWrap"> 
+	<ul>
+		<li><div class="s"><img src="images/1.jpg"></div>1</li>
+		<li><div class="s"><img src="images/3.jpg"></div>2</li>
+		<li><div class="s"><img src="images/2.jpg"></div>3</li>
+		<li><div class="s"><img src="images/4.jpg"></div>4</li>
+		<li><div class="s"><img src="images/5.jpg"></div>5</li>
+		<li><div class="s"><img src="images/2.jpg"></div>6</li>
+		<li><div class="s"><img src="images/4.jpg"></div>7</li>
+		<li><div class="s"><img src="images/1.jpg"></div>8</li>
+		<li><div class="s"><img src="images/1.jpg"></div>9</li> 
+		<li><div class="s"><img src="images/3.jpg"></div>10</li>
+		<li><div class="s"><img src="images/1.jpg"></div>11</li>
+		<li><div class="s"><img src="images/3.jpg"></div>12</li>
+		<li><div class="s"><img src="images/2.jpg"></div>13</li>
+		<li><div class="s"><img src="images/4.jpg"></div>14</li>
+		<li><div class="s"><img src="images/5.jpg"></div>15</li>
+		<li><div class="s"><img src="images/2.jpg"></div>16</li>
+		<li><div class="s"><img src="images/4.jpg"></div>17</li>
+		<li><div class="s"><img src="images/1.jpg"></div>18</li>
+		<li><div class="s"><img src="images/1.jpg"></div>19</li> 
+		<li><div class="s"><img src="images/3.jpg"></div>20</li> 
+	</ul>   
+</div>
+<!-- dom end -->
+
+
+<div id="scrollImgWrap2"> 
+	<ul>
+		<li><div class="s"><img src="images/1.jpg"></div>1</li>
+		<li><div class="s"><img src="images/3.jpg"></div>2</li>
+		<li><div class="s"><img src="images/2.jpg"></div>3</li>
+		<li><div class="s"><img src="images/4.jpg"></div>4</li>
+		<li><div class="s"><img src="images/5.jpg"></div>5</li>
+		<li><div class="s"><img src="images/2.jpg"></div>6</li> 
+	</ul>   
+</div>
+<script type="text/javascript" src="AniEffect.min.js"></script>
+<script type="text/javascript">
+;(function(){
+	
+	/* 
+	 *
+	 *	作者:   老可 
+	 *	时间:   2015.07.27 
+	 *	版本:  	v1.00
+	 *  QQ  :   279662403
+	 *  兼容:   IE7+ 【IE6没测试】
+	 *	
+	*/
+
+	var EventUtil,Get,Element,ScrollImg; 
+	EventUtil = {
+		addHandler: function(ele, type, handler) {
+			if (ele.addEventListener) {
+				ele.addEventListener(type, handler, false)
+			} else if (ele.attachEvent) {
+				ele.attachEvent("on" + type, handler)
+			} else {
+				ele["on" + type] = handler;
+			}
+		},
+		removeHandler: function(element, type, handler) {
+			if (element.removeEventListener) {
+				element.removeEventListener(type, handler, false);
+			} else if (element.detachEvent) {
+				element.detachEvent("on" + type, handler);
+			} else {
+				element["on" + type] = null;
+			}
+		},
+		getEvent: function(event) {
+			return event ? event : window.event;
+		},
+		getTarget: function(event) {
+			return event.target || event.srcElement;
+		},
+		preventDefault: function(event) {
+			if (event.preventDefault) {
+				event.preventDefault();
+			} else {
+				event.returnValue = false;
+			}
+		},
+		stopPropagation: function(event){
+	        if (event.stopPropagation){
+	            event.stopPropagation();
+	        } else {
+	            event.cancelBubble = true;
+	        }
+	    } 
+	};
+
+	Get = {
+		byId: function(id) {
+			return typeof id === "string" ? document.getElementById(id) : id
+		},
+		byClass: function(sClass, oParent) {
+			var aClass = [];
+			var reClass = new RegExp("(^| )" + sClass + "( |$)");
+			var aElem = this.byTagName("*", oParent);
+			for (var i = 0; i < aElem.length; i++) reClass.test(aElem[i].className) && aClass.push(aElem[i]);
+			return aClass
+		},
+		byTagName: function(elem, obj) {
+			return (obj || document).getElementsByTagName(elem)
+		}
+	}; 
+ 	
+ 	Element = {
+ 		hasClass:function(obj,name){
+			return (' '+obj.className+' ').indexOf(' '+name+' ') > -1 ? true : false;
+		},
+		addClass : function(obj,name){
+			if(this.hasClass(obj,name)) return;
+			obj.className += ' ' + name;
+		},
+		removeClass : function(obj,name){
+			obj.className = obj.className.replace(new RegExp('(^|\\s)' +name+ '(?:\\s|$)'),'$1').replace(/\s{1,}/g,' ');
+		}
+ 	}
+
+ 	ScrollImg = function (){
+ 		this.init.apply(this,arguments);  
+ 	}
+
+ 	ScrollImg.prototype = {
+ 		init: function (options){
+ 			var _is = this;
+ 			_is.settings = {
+ 				wrap:"scrollImgWrap",					//	插件ID
+ 				liWidth: 320,							//	li 宽
+ 				liMarRight: 10,							//	li 右边距
+ 				showNum: 4,	   							//  显示数目
+ 				scrollNum: 4,							//	滚动数目
+ 				loops: true, 							//  是否循环
+ 				autoPlay: true, 						//  是否自动播放
+ 				delay: 3000,							//  多久切换一次
+ 				duration: 300,							//  动画运行一次所需时间
+ 				effect: 1, 								//  切换效果 （1、2、3、4）
+ 				showBtn: true, 							//  是否显示左右按钮
+ 				showPage: true,							//  是否显示页数 
+ 				pageIndexClass:"on"						//  索引页类名
+ 				
+ 			}
+ 			_is.obj = _is.extendDeep(options,_is.settings);
+
+ 			
+
+ 			_is.wrap = Get.byId(_is.obj.wrap);
+ 			_is.ul = _is.wrap.getElementsByTagName('ul')[0];
+ 			_is.ul.style.cssText += 'position: absolute;top:0;left:0;width: 5000%;height: auto;overflow: hidden;'; 
+ 			_is.lis = _is.ul.getElementsByTagName('li'); 
+ 			_is.liH = _is.lis[0].offsetHeight;
+ 			_is.lisLen = _is.lis.length;
+ 			_is.pageLen = Math.ceil(_is.lisLen / _is.obj.scrollNum);
+ 			_is.cloneLi  = null;  
+			_is.oPageBox = null;
+			_is.oPageBtn = null;
+			_is.oPrevBtn = null;
+			_is.oNextBtn = null;
+ 			_is.moveW = 0, 
+ 			_is.maxCount = 0
+			_is.speed = 0;
+			_is.timer = null;
+			_is.oPage = null;
+			_is.oIndex = 0;
+ 
+			// 显示的数目与滚动的数目不能为0
+			if (_is.obj.showNum == 0 || _is.obj.scrollNum == 0) {
+ 				//alert('参数_is.obj.showNum的值 或 _is.obj.scrollNum的值 必须大于0');
+ 				throw new Error('参数_is.obj.showNum的值 或 _is.obj.scrollNum 必须大于0的值');
+ 				return false;
+ 			}
+
+ 			//滚动的数目不能大于显示数目
+ 			if (_is.obj.scrollNum > _is.obj.showNum) {
+ 				//alert("参数 _is.obj.scrollNum的值 不能大于 _is.obj.showNum的值");
+ 				throw new Error("参数 _is.obj.scrollNum的值 不能大于 _is.obj.showNum的值");
+ 				return false;
+ 			}
+
+ 			// 滚动的数目限制
+ 			if(_is.obj.scrollNum !== 1 && _is.obj.scrollNum !== _is.obj.showNum){
+ 				//alert("参数 _is.obj.scrollNum 要等于1 或等于 _is.obj.showNum的值")
+ 				throw new Error("参数 _is.obj.scrollNum 要等于1或等于 _is.obj.showNum的值");
+ 				return false;
+ 			}
+
+ 			_is.addEleFn();
+ 			_is.eventFn().addEntFn();
+
+ 		},
+ 		addEleFn: function (){
+ 			var _is = this,
+ 				oMainBox = document.createElement('div'),
+ 				oMw = (_is.obj.liWidth * _is.obj.showNum) + (_is.obj.liMarRight * (_is.obj.showNum - 1)), 
+ 				oFrag = document.createDocumentFragment(); 
+ 			//console.log("_is.pageLen "+_is.pageLen)
+ 			// 包裹 UL标签
+ 			oMainBox.style.cssText += 'display:block;width:' + oMw + 'px;height:'+ _is.liH + 'px;overflow: hidden;position: relative;margin:0 auto;';
+ 			oMainBox.className += "slIMain";
+ 			
+ 			oMainBox.appendChild(_is.ul); 
+ 			_is.wrap.appendChild(oMainBox);
+ 			_is.wrap.style.width = oMw + "px";
+
+ 			// 创建左右按钮
+ 			if (_is.obj.showBtn) {
+ 				_is.oPrevBtn = document.createElement('div');
+ 				_is.oNextBtn = document.createElement('div');
+
+ 				_is.oPrevBtn.className = "slIBtnPrev"; 
+	 			_is.oNextBtn.className = "slIBtnNext"; 
+	 			_is.wrap.appendChild(_is.oPrevBtn);
+	 			_is.wrap.appendChild(_is.oNextBtn);
+ 			}
+
+ 			// 创建分页标签
+ 			if (_is.obj.showPage) {
+ 				_is.oPageBox = document.createElement('div');
+ 				_is.oPageBox.className = "slIPage";
+ 				for (var i = 0; i < _is.pageLen; i++) {
+ 					_is.oPageBtn = document.createElement('i');
+ 					_is.oPageBtn.innerHTML = i + 1;   
+ 					oFrag.appendChild(_is.oPageBtn);
+ 				}; 
+
+ 				_is.oPageBox.appendChild(oFrag);
+ 				_is.wrap.appendChild(_is.oPageBox);
+
+ 				_is.oPage = Get.byClass("slIPage",_is.wrap)[0].getElementsByTagName('i');
+ 				_is.oPage[0].className = _is.obj.pageIndexClass; 
+ 			}
+
+ 			//如果循环
+ 			if(_is.obj.loops){
+
+ 				if (_is.obj.showNum == 1) {
+
+ 					_is.cloneLi = _is.lis[0].cloneNode(true); 
+	 				_is.ul.appendChild(_is.cloneLi)
+ 				}else{
+
+ 					for (var i = 0; i < _is.lisLen; i++) {
+	 					_is.cloneLi = _is.lis[i].cloneNode(true); 
+	 					_is.ul.appendChild(_is.cloneLi)
+	 				}; 
+ 				} 
+ 			} 
+ 			
+ 		},
+ 		eventFn: function (){
+ 			var _is = this;
+ 			function eventsFn (event){
+ 				clearTimeFn();
+ 				var target = EventUtil.getTarget(event);
+ 				if (target.className.indexOf("slIBtnPrev") > -1) {  
+
+ 					_is.moveFn();   
+
+ 				}else if(target.className.indexOf("slIBtnNext") > -1){  
+
+ 					_is.moveFn("mLeft"); 
+ 					
+ 				}else{
+ 					return false;
+ 				}
+
+ 				setTimeout(autoPlayFn,_is.obj.delay);
+ 			} 
+ 			function clearTimeFn (){ 
+ 				window.clearInterval(_is.timer),_is.timer = null;
+ 			}
+ 			function autoPlayFn (){
+
+ 				if (_is.obj.autoPlay) {
+ 					clearTimeFn();
+ 					_is.timer = setInterval(
+
+ 					function(){
+ 						_is.moveFn("mLeft");
+ 					},
+ 					_is.obj.delay)
+ 				}
+ 			} 
+ 			function addEnt(){ 
+
+ 				autoPlayFn();
+ 				EventUtil.addHandler(_is.wrap,'click',eventsFn);
+ 				EventUtil.addHandler(_is.wrap,'mouseover',clearTimeFn)
+ 				EventUtil.addHandler(_is.wrap,'mouseout',autoPlayFn)
+ 			}
+ 			return {
+ 				addEntFn:addEnt
+ 			}
+ 		},
+ 		maxCountFn: function (){
+ 			var _is = this; 
+ 
+			// 如果每次滚动一个
+ 			if (_is.obj.scrollNum === 1 ) {  
+
+ 				if (_is.obj.loops) {
+
+ 					_is.maxCount = _is.lisLen + 1;
+
+ 				}else{
+
+ 					//总值等于li长度减去显示的数目
+ 					_is.maxCount = _is.lisLen - _is.obj.showNum; 
+ 				}
+
+ 			}
+ 			// 如果li的长度等于两次的滚动数 , 
+ 			else if(_is.obj.scrollNum*2 === _is.lisLen){ 
+ 				
+ 				if (_is.obj.loops) {
+
+ 					_is.maxCount = 3;
+
+ 				}else{
+ 					//总值为 1
+ 					_is.maxCount = 1; 
+ 				}
+ 				//console.log('x2= '+_is.maxCount)
+
+ 			}
+ 			// 一般情况总值为这个（ps滚动数值要 == 显示的数值 【上面已做判断】）
+ 			else{ 
+ 				if (_is.obj.loops) {
+
+ 					_is.maxCount = Math.ceil(_is.lisLen / _is.obj.scrollNum) + 1; 
+
+ 				}else{
+ 					_is.maxCount = Math.ceil(_is.lisLen / _is.obj.scrollNum) - 1;  
+ 				} 
+ 			}  
+
+			//console.log("_is.maxCount = "+_is.maxCount)
+
+ 			// 如果滚动的值不等于1 ，而且li的长度不是滚动值的倍数 ， 那么在 _is.speed 为总值 -1 的时候 。如下
+ 			if (_is.obj.scrollNum !== 1 && _is.lisLen % _is.obj.scrollNum !== 0 && _is.speed == _is.maxCount-1) {
+ 				
+
+ 				var _AllWidth = _is.lisLen * _is.obj.liWidth + _is.lisLen * _is.obj.liMarRight, // 所有li加起来的长度
+ 					_WarpWidth = _is.obj.showNum * _is.obj.liWidth + _is.obj.showNum * _is.obj.liMarRight; //显示区域的长度
+
+ 			 	if (_is.obj.loops) {
+ 					
+ 					_is.moveW = (_is.obj.scrollNum * _is.obj.liWidth) + (_is.obj.liMarRight*_is.obj.scrollNum);
+
+ 				}else{
+
+ 					// 这块做死定位 ， (总长 - 显示区域的长)/ 总值  --PS:之所以除以总值是要抹去下面动画时候_is.speed的值
+ 					_is.moveW = (_AllWidth - _WarpWidth)/ _is.maxCount 
+ 				} 
+ 				//console.log("走一")
+
+ 			}else{
+
+ 				// 正常情况下要移动的值
+ 				_is.moveW = (_is.obj.scrollNum * _is.obj.liWidth) + (_is.obj.liMarRight*_is.obj.scrollNum);
+ 				//console.log("_is.moveW"+ _is.moveW)
+ 				//console.log("走二")
+ 			}
+ 		},
+ 		moveFn: function (change){
+ 			var _is = this; 
+
+ 			_is.maxCountFn(); 
+
+ 			if (change === "mLeft") { 
+ 				_is.speed ++ ; 
+
+				if (_is.obj.loops) {
+
+					if (_is.speed == _is.maxCount){
+
+						_is.ul.style.left = 0;
+						_is.speed = 1;  
+					} 
+					//console.log(_is.speed)
+				}else{
+
+					if (_is.speed > _is.maxCount) { 
+						_is.speed = _is.maxCount; 
+						return false;
+					}
+				
+				} 
+ 				 
+ 			}else{ 
+ 				_is.speed --;
+
+ 				if (_is.obj.loops) {
+ 					if (_is.speed < 0 ) {
+
+ 						_is.ul.style.left = - (_is.obj.liWidth *_is.lisLen) + "px";
+ 						_is.speed = Math.ceil(_is.lisLen/_is.obj.scrollNum) - 1; 
+ 						//console.log("_is.speed = " +_is.speed)
+
+ 					}
+ 				}else{
+ 					if (_is.speed < 0) { 
+
+	 					_is.speed = 0;
+	 					return false;
+	 				}
+
+ 				}
+ 				
+ 			}
+ 			_is.pageFn();
+ 			animate( _is.ul, {left: -_is.moveW * _is.speed}, _is.obj.duration, _is.obj.effect);
+ 			//console.log(_is.speed)
+ 		},
+ 		pageFn: function (){
+ 			var _is = this;  
+
+ 			if (_is.obj.showPage) {
+ 				_is.oIndex = _is.speed;  
+	 			for (var i = 0; i < _is.pageLen; i++) {
+	 				_is.oPage[i].className = "";
+	 				
+	 			};
+	 			if (_is.oIndex === _is.maxCount - 1) {
+	 				_is.oIndex = 0;
+	 			}
+	 			_is.oPage[_is.oIndex].className = _is.obj.pageIndexClass; 
+ 			}
+ 		},
+ 		// 复制
+		extendDeep: function(parent,child){
+			var i,
+				toStr = Object.prototype.toString(),
+				astr = "[Object Array]";
+
+			child = child || {}; 
+
+			for(i in parent){ 
+				if (parent.hasOwnProperty(i)) { 
+					if (typeof parent[i] === "Object") { 
+
+						child[i] = (toStr.call(parent[i]) === astr) ? [] : {};
+						extendDeep(parent[i], child[i]);
+
+					} else { 
+						child[i] = parent[i];
+					}
+				}
+
+			} 
+			return child;
+		}
+ 	}
+
+ 	window['ScrollImg'] = function (options){
+ 		return new ScrollImg(options);
+ 	}
+
+ 	
+
+})()
+
+window.onload = function(){
+	ScrollImg({
+		wrap:"scrollImgWrap",					//	插件ID - 必写
+		liWidth: 320,							//	li 宽  - 必写
+		liMarRight: 10,							//	li 右边距 - 必写
+		showNum: 4,	   							//  显示数目 - 可写  【默认4】
+		scrollNum: 4,							//	滚动数目 - 可写	 【默认4】		
+		loops: true, 							//  是否循环 - 可写  【默认循环】
+		autoPlay: true, 						//  是否自动播放 - 可写 【默认自动播放】
+		delay: 3000,							//  多久切换一次 - 可写  【默认3s】
+		duration: 1000,							//  动画运行一次所需时间 - 可写
+		effect: 4, 								//  切换效果 （1、2、3、4） - 可写
+		showBtn: true, 						    //  是否显示左右按钮 - 可写
+		showPage: true,						    //  是否显示页数 - 可写
+		pageIndexClass:"on"						//  索引页类名 - 可写
+	});
+
+	ScrollImg({
+		wrap:"scrollImgWrap2",
+		showNum:1,
+		scrollNum:1,
+		autoPlay:false
+	});
+}
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <div id="scrollImgWrap">
+	<div class="slIMain">
+		<ul>
+			<li><a href="#"><img src="images/1.jpg"></a></li>
+			<li><a href="#"><img src="images/3.jpg"></a></li>
+			<li><a href="#"><img src="images/2.jpg"></a></li>
+			<li><a href="#"><img src="images/4.jpg"></a></li>
+			<li><a href="#"><img src="images/5.jpg"></a></li>
+			<li><a href="#"><img src="images/2.jpg"></a></li>
+			<li><a href="#"><img src="images/4.jpg"></a></li>
+			<li><a href="#"><img src="images/1.jpg"></a></li>
+		</ul>
+	</div>
+	<div class="slIBtnPrev">L</div>
+	<div class="slIBtnNext">R</div>
+	<div class="slIPage">
+		<i class="on"></i>
+		<i></i>
+		<i></i>
+		<i></i>
+		<i></i>
+		<i></i>
+		<i></i>
+		<i></i>
+	</div>
+</div> -->
+</html>

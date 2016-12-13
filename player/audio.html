@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<!--<script type="text/javascript" src="http://p1.yokacdn.com/pic/div/2015/topic/01/mxjy/js/zepto.min.js"></script>-->
+	<script type="text/javascript">
+		var phoneWidth =  parseInt(window.screen.width);
+			var phoneScale = phoneWidth/640;
+			var ua = navigator.userAgent;
+			if (/Android (\d+\.\d+)/.test(ua)){
+				var version = parseFloat(RegExp.$1);
+				if(version>2.3){
+					document.write('<meta name="viewport" content="width=640, minimum-scale = '+phoneScale+', maximum-scale = '+phoneScale+', target-densitydpi=device-dpi">');
+				}else{
+					document.write('<meta name="viewport" content="width=640, target-densitydpi=device-dpi">');
+				}
+			} else {
+				document.write('<meta name="viewport" content="width=640, user-scalable=no, target-densitydpi=device-dpi">');
+			}
+	</script>
+	<style type="text/css">
+	  *{margin: 0; padding: 0;}
+	  .audioPar span{display: block;width: 50px;height: 50px;margin: 10px auto;background-color: gray;}
+	  .audioPar span.on{background-color: red;}
+	  audio{display: block;margin: 0 auto;}
+	</style>
+</head> 
+<body>
+<div class="audioPar">
+	<audio src="qingcheng.mp3" preload="auto" autoplay loop controls></audio>
+	<span class="playBtn on"></span>
+</div>
+<div class="audioPar">
+	<audio src="home.mp3" preload="auto" ></audio>
+	<span class="playBtn"></span>
+</div>
+<div class="audioPar">
+	<audio src="http://p1.yokacdn.com/pic/div/2015/topic/01/mxjy/media/zhangchi.mp3" preload="auto" ></audio>
+	<span class="playBtn"></span>
+</div>	
+<script type="text/javascript">
+ 
+function Play(){
+	this.oAudio = document.getElementsByTagName('audio');
+	this.oSpan = document.querySelectorAll('.playBtn');
+	//console.log(this.oSpan) 
+}	
+Play.prototype = {
+	init:function(){
+		var _this = this; 
+		//_this.error();
+		_this.endfn(); 
+		_this.tapPlay();
+	},
+	clearPlay:function(){
+		for (var i = 0; i < this.oAudio.length; i++) {
+			var sib = this.oAudio[i];
+			sib.pause();
+			sib.nextElementSibling.classList.remove('on');
+		};
+	},
+	tapPlay:function(){
+		var _this = this;
+		for (var i = 0; i < _this.oSpan.length; i++) {
+			_this.oSpan[i].addEventListener('click',function(){ 
+				_this.toPlay(this);
+			},false)
+		}; 
+	}, 
+	toPlay:function(ele){
+		var oPre = ele.previousElementSibling; 
+		if (oPre.paused) {
+			this.clearPlay();
+			oPre.play();
+			ele.classList.add('on'); 
+		}else{
+			oPre.pause();
+			ele.classList.remove('on');
+		};
+	},
+	endfn:function(){
+		var len = this.oAudio.length; 
+		for (var i = 0; i < len; i++) {  
+			this.oAudio[i].addEventListener('ended',function(){
+				var _this = this,oNext = _this.nextElementSibling; 
+				oNext.classList.remove('on');	
+			}, false)
+		}; 
+	},
+	error:function(){ 
+		var _this = this,errorAudio = _this.oAudio,len = errorAudio.length; 
+		for (var i = 0; i < len; i++) { 
+				errorAudio[i].addEventListener('error',function(){  
+					//(function($$){ 
+					var result = this.error;
+					switch(result.code){
+						case 1://MediaError.MEDIA_ERROR_ABORTED:
+							alert("音乐下载过程被中止啦！");
+							break;
+						case 2://MediaError.MEDIA_ERROR_NETWORK:
+							alert("网络发生故障,音乐下载过程被中止啦！");
+							break;
+						case 3://MediaError.MEDIA_ERROR_DECODE:
+							alert("解码失败");
+							break;
+						case 4://MediaError.MEDIA_ERROR_SRC_NOT_SUPPORTED:
+							alert("不支持播放的音乐格式");
+							break;
+						default:
+							alert("未知错误")
+					}
+					//})(this)
+				},false);
+			
+		};
+		
+	}
+}
+window.onload = function(){
+	var nPlay = new Play();
+	nPlay.init();
+}
+ 
+</script>
+</body>
+</html>

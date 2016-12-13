@@ -1,0 +1,93 @@
+
+<!DOCTYPE HTML> 
+<html> 
+<head> 
+<meta charset="utf-8"> 
+<title>放大镜</title> 
+<meta name="Keywords" content=""> 
+<meta name="Description" content=""> 
+<style type="text/css"> 
+/*重置{*/ 
+html{color:#000;background:#fff;} 
+body,div{padding:0;margin:0;} 
+img{border:none;} 
+/*}重置*/ 
+.outer{width:320px;height:240px;position:relative;margin:20px auto;} 
+.inner{width:80px;height:60px;background:#f55;position:absolute;opacity:0.5;filter:alpha(opacity=50);left:0;top:0;cursor:pointer;} 
+.aa{width:320px;height:240px;position:relative;border:1px red solid;margin:20px auto;overflow:hidden;} 
+.imgs{position:absolute;width:1280px;height: 960px; }
+.imgs>img{width: 100%;height: 100%;} 
+.outer img{width:320px;height:240px;} 
+</style> 
+</head> 
+<body> 
+<div> 
+	<div class="outer" id="outer"> 
+		<img src="userimg.jpg" alt="pobaby小图"/> 
+		<div class="inner" id="inner"></div> 
+	</div> 
+	<div class="aa" id="aa"> 
+		<div class="imgs" id="imgs" ><img src="userimg-big.jpg" alt="pobaby大图"/></div> 
+	</div> 
+</div> 
+<script type="text/javascript"> 
+	var outer=document.getElementById("outer"); 
+	var inner=document.getElementById("inner"); 
+	var aa=document.getElementById("aa"); 
+	var imgs=document.getElementById("imgs"); 
+	var x,y,n=false; 
+	inner.onmousedown=test1;//如果把inner改为document,鼠标在窗口任意位置点击，图片都会跟随 
+	outer.onmousemove=test2;//document如果改为outer,鼠标在outer内才起作用 
+	document.onmouseup=test3;
+
+	function test1(event){//鼠标按下时方法 
+		var event=event || window.event;//调试兼容,各个浏览器认识event有差别. 
+		n=true;//当n=true（n的值可随便设定）时，假定为鼠标按下的事件 
+		x=event.clientX-inner.offsetLeft;//鼠标在透明层的相对横坐标=鼠标坐标-方块左边距 
+		y=event.clientY-inner.offsetTop;//鼠标在透明层的相对纵坐标=鼠标坐标-方块上边距 
+		//var cons = "x = " + x + ", y = " + y 
+		//console.log(cons)
+	} 
+	function test2(event){//鼠标移动时方法 
+		var event=event || window.event; 
+		if(n==true){ 
+			////////鼠标移动范围 
+			inner.style.left=event.clientX-x+"px"; 
+			inner.style.top=event.clientY-y+"px"; 
+			////////图片移动范围 
+			imgs.style.left=-4*parseInt(inner.style.left)+"px"; 
+			imgs.style.top=-4*parseInt(inner.style.top)+"px"; 
+			////////////////////////////限定鼠标移动的范围 
+			if(parseInt(inner.style.left)<0){ 
+				inner.style.left=0+"px"; 
+			} 
+			if(parseInt(inner.style.top)<0){ 
+				inner.style.top=0+"px"; 
+			} 
+			if(parseInt(inner.style.left)>outer.clientWidth-inner.clientWidth){ 
+				inner.style.left=outer.clientWidth-inner.clientWidth+"px"; 
+			} 
+			if(parseInt(inner.style.top)>outer.clientHeight-inner.clientHeight){ 
+				inner.style.top=outer.clientHeight-inner.clientHeight+"px"; 
+			} 
+			//////////////////////////////限定图片移动的范围 
+			if(parseInt(imgs.style.left)>0){ 
+				imgs.style.left=0+"px"; 
+			} 
+			if(parseInt(imgs.style.top)>0){ 
+				imgs.style.top=0+"px"; 
+			} 
+			if(parseInt(imgs.style.left)<-4*(outer.clientWidth-inner.clientWidth)){ 
+				imgs.style.left=-4*parseInt(outer.clientWidth-inner.clientWidth)+"px"; 
+			} 
+			if(parseInt(imgs.style.top)<-4*(outer.clientHeight-inner.clientHeight)){ 
+				imgs.style.top=-4*parseInt(outer.clientHeight-inner.clientHeight)+"px"; 
+			} 
+		} 
+	} 
+	function test3(){//鼠标松开时方法 
+	n=false; 
+	} 
+</script> 
+</body> 
+</html> 

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>滚动条</title>
+	<style type="text/css"> 
+		*{margin: 0;padding: 0;}
+		ul,li,ol{list-style: none;}
+		img{border: 0;vertical-align: top;}
+		a{outline: none;text-decoration: none;} 
+		/*mxscrollBar*/
+		.mxScrollbar1{
+			float: left;position: relative;width: 300px;height: 500px;overflow: hidden;border: 1px solid #f3f3f3;box-shadow: 1px 1px 15px 2px #ccc;margin:150px 0 0 200px;
+		} 
+		.mxScrollbar2{
+			float: left;position: relative;width: 200px;height: 500px;overflow: hidden;border: 1px solid #f3f3f3;box-shadow: 1px 1px 15px 2px gray;margin: 150px 200px 0 200px;
+		}
+		 
+		.mx-ScrollBox{
+			width: auto; margin-right: 12px;
+		}
+		
+		.mx-draggerCon{display: none;position: absolute;right:0;top:0;width: 10px;height: 100%;background-color: #999;border-radius: 20px;} 
+		.mx-draggerCn{ position: absolute;top: 0;left: 0;width: 100%;height: 50px;background-color: #333; cursor:pointer;border-radius: 20px; }
+ 
+		.ccn p{height:50px;margin-bottom: 40px;text-align: center;line-height: 50px;font-size: 24px;font-family: arial;background-color: #ccc;} 
+		.posfixc{position: fixed;top: 151px;left: 201px;width: 288px; }
+</style>
+</head>
+<body> 
+<div id="mxSCBcontent1" class="mxScrollbar1">  
+			<div class="ccn"> 
+				<div>1</div>
+				<p>1content</p><p>2content</p><p>3content</p>
+				<p>4content</p><p>5content</p><p id="posfix">6content</p><p>7content</p><p>8content</p><p>9content</p><p>10content</p>
+				
+				<p>1content</p><p>2content</p><p>3content</p>
+				<p>4content</p><p>5content</p><p>6content</p><p>7content</p><p>8content</p><p>9content</p><p>10content</p>
+			</div>  
+</div>
+
+
+
+<div id="mxSCBcontent2" class="mxScrollbar2">  
+		<!-- <div class="mx-ScrollBox">
+			<div class="mx_container"> -->
+			<div class="ccn">
+				<div>1</div>
+				<p>1content</p><p>2content</p><p>3content</p>
+				<p>4content</p><p>5content</p><p>6content</p><p>7content</p><p>8content</p><p>9content</p><p>10content</p>
+				
+				<p>1content</p><p>2content</p><p>3content</p>
+				<p>4content</p><p>5content</p><p>6content</p><p>7content</p><p>8content</p><p>9content</p><p>10content</p>
+				<p>1content</p><p>2content</p><p>3content</p>
+				<p>4content</p><p>5content</p><p>6content</p><p>7content</p><p>8content</p><p>9content</p><p>10content</p>
+				<p>1content</p><p>2content</p><p>3content</p>
+				<p>4content</p><p>5content</p><p>6content</p><p>7content</p><p>8content</p><p>9content</p><p>10content</p> 
+			</div>	  
+			<!-- </div>
+		</div>  -->
+</div>    
+<script type="text/javascript" src="mscrollBar.min.js"></script>
+
+<script type="text/javascript"> 
+
+window.onload = function() {  
+	MxScrollBar({ 
+		tag :"mxSCBcontent1",
+		scrPos:600,
+		Rang:20,
+		callbacks: function(msTop){ 
+			var posf = document.getElementById("posfix");
+			if (msTop < -466) {  
+				//posf.classList.add("posfixc");
+				posf.className = "posfixc"
+			}else{
+				//posf.classList.remove("posfixc");
+				posf.className = ""
+			}
+		}
+	});
+
+	MxScrollBar({
+		tag: "mxSCBcontent2",
+		Anim: false,
+		Rang: 100
+	}); 
+
+}
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <script type="text/javascript" src="http://fan.yoka.com/fan5.0/js/jquery1.9.js"></script> -->
+<script type="text/javascript">
+/*;(function($){ 
+    $.fn.mxScrollBar = function(options,callback){
+        var $_this = $(this),
+
+            opts = $.extend({}, {
+            	scorllBar:true,
+            	scorllBtn:true,	               
+            }, options || {}), 
+            callback = callback || function(){};
+
+        // 初始化
+        (function(){
+        	 
+        })(); 
+        
+        
+	}
+})(window.jQuery);	 
+
+$(function(){
+	$("#mx-SCBcontent").mxScrollBar();
+})*/
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+/*.grad{ 
+			width: 600px;height: 40px; 
+			 background: #ace;
+			  /*Controls the size
+			  -webkit-background-size: 20px 20px; */
+
+			/*background: -webkit-linear-gradient(left, #ace, #f96);*/
+			/*background: -webkit-radial-gradient(bottom left,circle, #ace, #f96); 
+			 background-image: -webkit-linear-gradient(45deg, #555 25%, transparent 25%, transparent),
+		    -webkit-linear-gradient(-45deg, #555 25%, transparent 25%, transparent),
+		    -webkit-linear-gradient(45deg, transparent 75%, #555 75%),
+		    -webkit-linear-gradient(-45deg, transparent 75%, #555 75%);
+		}*/
+</style>
+<!-- <div class="grad"></div> 
+<meter value="3" min="0" max="10" draggable>3/10</meter> -->
+
+</body>
+</html>

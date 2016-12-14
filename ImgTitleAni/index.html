@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style type="text/css">
+		*{ margin: 0; padding: 0; font-family: "Microsoft Yahei"}
+		#ul1{ width: 1100px; margin: 10px auto; list-style: none;}
+		#ul1 li{ width: 260px; margin: 0 5px 5px 0; height: 150px; background: yellowgreen; position: relative; float: left;}
+		div.tit{ position: absolute; left: 0; bottom: 0; height: 38px; width: 260px; overflow: hidden;}
+		div.tit p{ color: #fefefe; position: absolute; background: rgba(0,0,0,.5); line-height: 38px; text-align: center; width: 100%;}
+	</style>
+</head>
+<body>
+	<ul id="ul1">
+		<li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li><li><span></span></li>
+	</ul>
+	<script type="text/javascript">
+
+		/**
+	 	 *  @author 马轶超 （本人朋友）
+	 	 */
+
+
+		var aLi = document.getElementsByTagName('ul')[0].children;
+		var blackTit = null;
+		var centralPointX = 0;
+		var centralPointY = 0;
+
+		var a = aLi[0].offsetWidth/2;
+		var b = aLi[0].offsetHeight/2;
+		var i = 0;
+		var len = aLi.length;
+		
+		for(; i < len; i++){
+			aLi[i].inTxt = '';
+			aLi[i].outTxt = '';
+			aLi[i].index = i;
+			aLi[i].onmouseover = function(e){
+				var e = e || event;
+				var eleF = this, eleS = e.relatedTarget;
+
+				if(!elContains(eleF,eleS) && eleF!=eleS){
+
+					dir(e, this, 'inTxt')
+
+					if(this.children[this.children.length - 1].className !== 'tit'){
+						var oTit = document.createElement('div');
+						oTit.className = 'tit'
+						oTit.innerHTML = '<p>这是第'+ (this.index + 1) +'个标题</p>'
+						this.appendChild(oTit);
+					}
+
+					blackTit = getClass(this, 'tit')[0].children[0];
+
+					switch(this.inTxt){
+						case 'up' :
+							blackTit.style.left = '0';
+							blackTit.style.top = blackTit.offsetHeight * -1 + 'px';		
+							break;
+
+
+						case 'right' :
+							blackTit.style.left = blackTit.offsetWidth + 'px';
+							blackTit.style.top = '0';		
+							break;
+
+						case 'down' :
+							blackTit.style.left = '0';
+							blackTit.style.top = blackTit.offsetHeight + 'px';			
+							break;
+
+						case 'left' :
+							blackTit.style.left = blackTit.offsetWidth * -1 + 'px';;
+							blackTit.style.top = '0';
+							break;
+					}
+
+					animate(blackTit, {'left' : 0, 'top' : 0}, 200);
+
+				}
+			}
+
+			aLi[i].onmouseout = function(e){
+				var e = e || event;
+				var eleF = this, eleS = e.relatedTarget;
+
+				if(!elContains(eleF,eleS) && eleF!=eleS){
+
+					dir(e, this, 'outTxt');
+
+					switch(this.outTxt){
+						case 'up' :
+							animate(blackTit, {'top' : blackTit.offsetHeight * -1, 'left' : 0}, 200);
+							break;
+
+						case 'right' :
+							animate(blackTit, {'left' : blackTit.offsetWidth, 'top' : 0}, 200);
+							break;
+
+						case 'down' :
+							animate(blackTit, {'top' : blackTit.offsetHeight, 'left' : 0}, 200);
+							break;
+
+						case 'left' :
+							animate(blackTit, {'left' : blackTit.offsetWidth * -1, 'top' : 0}, 200);
+							break;
+					}
+					
+				}
+			}
+		}
+		
+		function getDir(a, b, c, d, dir1, dir2){
+			var dirTxt = '';
+
+			var liRad = Math.atan(a/b);
+			var mRad = Math.atan(c/d);
+
+			if(mRad < liRad){
+				dirTxt = dir1;
+			}else{
+				dirTxt = dir2;
+			}
+
+			return dirTxt;
+		}
+
+		function dir(e, obj, mousePosTxt){
+			var l = document.documentElement.scrollLeft || document.body.scrollLeft;
+			var t = document.documentElement.scrollTop || document.body.scrollTop;
+			centralPointX = getPos(obj).x + obj.offsetWidth/2;
+			centralPointY = getPos(obj).y + obj.offsetHeight/2;
+
+			var eX = e.clientX + l;
+			var eY = e.clientY + t;
+
+			if(eX > centralPointX && eY < centralPointY){ //右上
+			
+				obj[mousePosTxt] = getDir(a, b, eX - centralPointX, centralPointY - eY, 'up', 'right')
+
+			}else if(eX > centralPointX && eY > centralPointY){  //右下
+
+				obj[mousePosTxt] = getDir(b, a, eY - centralPointY, eX - centralPointX, 'right', 'down')
+
+			}else if(eX < centralPointX && eY > centralPointY){  //左下
+
+				obj[mousePosTxt] = getDir(b, a, eY - centralPointY, centralPointX - eX, 'left', 'down')
+
+			}else if(eX < centralPointX && eY < centralPointY){  //左上
+
+				obj[mousePosTxt] = getDir(a, b, centralPointX - eX, centralPointY - eY, 'up', 'left')
+			}
+		}
+
+
+		function getPos(obj){
+			var l = 0,
+				t = 0;
+
+			while(obj){
+				l += obj.offsetLeft;
+				t += obj.offsetTop;
+
+				obj = obj.offsetParent;
+			}
+
+			return {
+				x : l,
+				y : t
+			}
+		}
+
+		function elContains(a, b){
+			return a.contains ? a != b && a.contains(b) : !!(a.compareDocumentPosition(b) & 16);	
+		}
+
+
+		function getClass(oParent, sClass){
+			var aEle = oParent.getElementsByTagName("*");
+			var aRes = [];
+			var reg=new RegExp("\\b"+sClass+"\\b","ig");
+			
+			for(var i = 0; i < aEle.length; i++){
+				if(reg.test(aEle[i].className)){
+					aRes.push(aEle[i]);
+				}
+			}
+			
+			return aRes;
+		}
+
+		
+		function animate(obj, json, times, fx, callback){
+
+			if( typeof times == 'undefined' ){
+				times = 400;
+				fx = 'linear';
+			}
+			
+			if( typeof times == 'string' ){
+				if(typeof fx == 'function'){
+					callback = fx;
+				}
+				fx = times;
+				times = 400;
+			}
+			else if(typeof times == 'function'){
+				callback = times;
+				times = 400;
+				fx = 'linear';
+			}
+			else if(typeof times == 'number'){
+				if(typeof fx == 'function'){
+					callback = fx;
+					fx = 'linear';
+				}
+				else if(typeof fx == 'undefined'){
+					fx = 'linear';
+				}
+			}
+
+			var beginVal = {};
+
+			for(var attr in json){
+				beginVal[attr] = 0;
+
+				if(attr == 'opacity'){
+					beginVal[attr] = Math.round(getCss(obj, 'opacity') * 100);
+				}else{
+					beginVal[attr] = parseInt(getCss(obj, attr));
+				}
+
+			}
+
+			var startTime = nowTime();
+
+			clearInterval(obj.timer);
+			obj.timer = setInterval(function(){
+
+				var curTime = nowTime();
+				var t = times - Math.max(0, startTime - curTime + times);
+
+				for(var attr in json){
+				
+					var b  = beginVal[attr];
+					var c = json[attr] - beginVal[attr];
+					var d = times;
+
+					var value = Tween[fx](t,b,c,d)
+
+					if(attr == 'opacity'){
+						obj.style.opacity = value/100;
+						obj.style.filter = 'alpha(opacity='+ value +')';
+					}else{
+						obj.style[attr] = value + 'px';
+					}
+
+				}
+
+
+
+				if(t == times){
+					clearInterval(obj.timer);
+					callback && callback.call(obj);
+				}
+				
+			},13)
+		}
+
+		function nowTime(){
+			return (new Date).getTime();
+		}
+
+		function getCss(obj, attr){
+			if(obj.currentStyle){
+				return obj.currentStyle[attr];
+			}else{
+				return getComputedStyle(obj, false)[attr];
+			}
+		}
+
+		var Tween = {
+			linear: function (t, b, c, d){  //匀速
+				return c*t/d + b;
+			},
+			easeIn: function(t, b, c, d){  //加速曲线
+				return c*(t/=d)*t + b;
+			},
+			easeOut: function(t, b, c, d){  //减速曲线
+				return -c *(t/=d)*(t-2) + b;
+			},
+			easeBoth: function(t, b, c, d){  //加速减速曲线
+				if ((t/=d/2) < 1) {
+					return c/2*t*t + b;
+				}
+				return -c/2 * ((--t)*(t-2) - 1) + b;
+			},
+			easeInStrong: function(t, b, c, d){  //加加速曲线
+				return c*(t/=d)*t*t*t + b;
+			},
+			easeOutStrong: function(t, b, c, d){  //减减速曲线
+				return -c * ((t=t/d-1)*t*t*t - 1) + b;
+			},
+			easeBothStrong: function(t, b, c, d){  //加加速减减速曲线
+				if ((t/=d/2) < 1) {
+					return c/2*t*t*t*t + b;
+				}
+				return -c/2 * ((t-=2)*t*t*t - 2) + b;
+			},
+			elasticIn: function(t, b, c, d, a, p){  //正弦衰减曲线（弹动渐入）
+				if (t === 0) { 
+					return b; 
+				}
+				if ( (t /= d) == 1 ) {
+					return b+c; 
+				}
+				if (!p) {
+					p=d*0.3; 
+				}
+				if (!a || a < Math.abs(c)) {
+					a = c; 
+					var s = p/4;
+				} else {
+					var s = p/(2*Math.PI) * Math.asin (c/a);
+				}
+				return -(a*Math.pow(2,10*(t-=1)) * Math.sin( (t*d-s)*(2*Math.PI)/p )) + b;
+			},
+			elasticOut: function(t, b, c, d, a, p){    //正弦增强曲线（弹动渐出）
+				if (t === 0) {
+					return b;
+				}
+				if ( (t /= d) == 1 ) {
+					return b+c;
+				}
+				if (!p) {
+					p=d*0.3;
+				}
+				if (!a || a < Math.abs(c)) {
+					a = c;
+					var s = p / 4;
+				} else {
+					var s = p/(2*Math.PI) * Math.asin (c/a);
+				}
+				return a*Math.pow(2,-10*t) * Math.sin( (t*d-s)*(2*Math.PI)/p ) + c + b;
+			},    
+			elasticBoth: function(t, b, c, d, a, p){
+				if (t === 0) {
+					return b;
+				}
+				if ( (t /= d/2) == 2 ) {
+					return b+c;
+				}
+				if (!p) {
+					p = d*(0.3*1.5);
+				}
+				if ( !a || a < Math.abs(c) ) {
+					a = c; 
+					var s = p/4;
+				}
+				else {
+					var s = p/(2*Math.PI) * Math.asin (c/a);
+				}
+				if (t < 1) {
+					return - 0.5*(a*Math.pow(2,10*(t-=1)) * 
+							Math.sin( (t*d-s)*(2*Math.PI)/p )) + b;
+				}
+				return a*Math.pow(2,-10*(t-=1)) * 
+						Math.sin( (t*d-s)*(2*Math.PI)/p )*0.5 + c + b;
+			},
+			backIn: function(t, b, c, d, s){     //回退加速（回退渐入）
+				if (typeof s == 'undefined') {
+				   s = 1.70158;
+				}
+				return c*(t/=d)*t*((s+1)*t - s) + b;
+			},
+			backOut: function(t, b, c, d, s){
+				if (typeof s == 'undefined') {
+					s = 3.70158;  //回缩的距离
+				}
+				return c*((t=t/d-1)*t*((s+1)*t + s) + 1) + b;
+			}, 
+			backBoth: function(t, b, c, d, s){
+				if (typeof s == 'undefined') {
+					s = 1.70158; 
+				}
+				if ((t /= d/2 ) < 1) {
+					return c/2*(t*t*(((s*=(1.525))+1)*t - s)) + b;
+				}
+				return c/2*((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2) + b;
+			},
+			bounceIn: function(t, b, c, d){    //弹球减振（弹球渐出）
+				return c - Tween['bounceOut'](d-t, 0, c, d) + b;
+			},       
+			bounceOut: function(t, b, c, d){
+				if ((t/=d) < (1/2.75)) {
+					return c*(7.5625*t*t) + b;
+				} else if (t < (2/2.75)) {
+					return c*(7.5625*(t-=(1.5/2.75))*t + 0.75) + b;
+				} else if (t < (2.5/2.75)) {
+					return c*(7.5625*(t-=(2.25/2.75))*t + 0.9375) + b;
+				}
+				return c*(7.5625*(t-=(2.625/2.75))*t + 0.984375) + b;
+			},      
+			bounceBoth: function(t, b, c, d){
+				if (t < d/2) {
+					return Tween['bounceIn'](t*2, 0, c, d) * 0.5 + b;
+				}
+				return Tween['bounceOut'](t*2-d, 0, c, d) * 0.5 + c*0.5 + b;
+			}
+		}
+	</script>
+</body>
+</html>
